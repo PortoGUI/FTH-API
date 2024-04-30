@@ -44,7 +44,6 @@ const createUser = (req, res) => {
   const query = 'INSERT INTO "user" ("name", "document", "email", "login", "password", "type") VALUES ($1, $2, $3, $4, $5, $6)';
   const values = [name, document, email, login, hashedPassword, type];
 
-  // Executar a query
   pool.query(query, values, (error, results) => {
     if (error) {
       console.error('Erro ao criar usuário:', error);
@@ -55,8 +54,30 @@ const createUser = (req, res) => {
   });
 };
 
+const authenticate = (req, res) => {
+  const { login, password } = req.body;
+
+  const hashedPassword = sha256(password + SUPER_KEY);
+
+  const query = 'SELECT * FROM "user" WHERE login = $1 AND password = $2';
+  const values = [login, hashedPassword];
+
+  pool.query(query, values, (error, results) => {
+    if (error) {
+      res.status(500).json({ error: 'Erro ao autenticar o usuário' });
+    } else {
+      if (results.rows.length > 0) {
+        res.status(200).json({ message: 'Usuário autenticado com sucesso', data: {...results.rows[0], token: 'user-logged-in'} });
+      } else {
+        res.status(404).json({ error: 'Usuário não encontrado' });
+      }
+    }
+  });
+};
+
 module.exports = {
   getUsers,
   getUserById,
   createUser,
+  authenticate,
 };
