@@ -8,7 +8,7 @@ const getUsers = (req, res) => {
   pool.query(query, (error, results) => {
     if (error) {
       console.error('Erro ao buscar usuários:', error);
-      res.status(500).json({ error: 'Erro ao buscar usuários' });
+      res.status(500).json({error: 'Erro ao buscar usuários'});
     } else {
       res.json(results.rows);
     }
@@ -25,10 +25,10 @@ const getUserById = (req, res) => {
   pool.query(query, values, (error, results) => {
     if (error) {
       console.error('Erro ao buscar usuário pelo ID:', error);
-      res.status(500).json({ error: 'Erro ao buscar usuário pelo ID' });
+      res.status(500).json({error: 'Erro ao buscar usuário pelo ID'});
     } else {
       if (results.rows.length === 0) {
-        res.status(404).json({ error: 'Usuário não encontrado' });
+        res.status(404).json({error: 'Usuário não encontrado'});
       } else {
         res.json(results.rows[0]);
       }
@@ -37,7 +37,7 @@ const getUserById = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, document, email, login, password, type } = req.body;
+  const {name, document, email, login, password, type} = req.body;
 
   const hashedPassword = sha256(password + SUPER_KEY);
 
@@ -47,15 +47,15 @@ const createUser = (req, res) => {
   pool.query(query, values, (error, results) => {
     if (error) {
       console.error('Erro ao criar usuário:', error);
-      res.status(500).json({ error: 'Erro ao criar usuário' });
+      res.status(500).json({error: 'Erro ao criar usuário'});
     } else {
-      res.status(201).json({ message: 'Usuário criado com sucesso' });
+      res.status(201).json({message: 'Usuário criado com sucesso'});
     }
   });
 };
 
 const authenticate = (req, res) => {
-  const { login, password } = req.body;
+  const {login, password} = req.body;
 
   const hashedPassword = sha256(password + SUPER_KEY);
 
@@ -64,12 +64,15 @@ const authenticate = (req, res) => {
 
   pool.query(query, values, (error, results) => {
     if (error) {
-      res.status(500).json({ error: 'Erro ao autenticar o usuário' });
+      res.status(500).json({error: 'Erro ao autenticar o usuário'});
     } else {
       if (results.rows.length > 0) {
-        res.status(200).json({ message: 'Usuário autenticado com sucesso', data: {...results.rows[0], token: 'user-logged-in'} });
+        res.status(200).json({
+          message: `Bem vindo, ${results.rows[0].name}`,
+          data: {...results.rows[0], token: 'user-logged-in'}
+        });
       } else {
-        res.status(404).json({ error: 'Usuário não encontrado' });
+        res.status(404).json({error: 'Login e senha inválidos'});
       }
     }
   });
